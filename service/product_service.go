@@ -6,6 +6,7 @@ import (
 	"one-week-project-ecommerce/helper"
 	"one-week-project-ecommerce/model"
 	"one-week-project-ecommerce/repository"
+	"time"
 
 	"github.com/go-playground/validator/v10"
 	"github.com/google/uuid"
@@ -46,7 +47,14 @@ func (p *ProdctServiceImpl) Create(product request.CreateProductRequest) {
 
 // Delete implements ProductServcice.
 func (p *ProdctServiceImpl) Delete(productUPI string) {
-	panic("unimplemented")
+	productData, err := p.ProductRepository.FindByUPI(productUPI)
+	helper.ErrorPanic(err)
+
+	productData.UpdatedAt = time.Now()
+	productData.IsDeleted = true
+	productData.UpdatedBy = "System"
+
+	p.ProductRepository.Delete(productData)
 }
 
 // FindAll implements ProductServcice.
@@ -69,7 +77,9 @@ func (p *ProdctServiceImpl) FindAll() []response.ProductResponse {
 // FindbyID implements ProductServcice.
 func (p *ProdctServiceImpl) FindbyUPI(productUPI string) response.ProductResponse {
 	productData, err := p.ProductRepository.FindByUPI(productUPI)
-	helper.ErrorPanic(err)
+	if err != nil {
+		panic(helper.NewNotFoundError(err.Error()))
+	}
 	productResponse := response.ProductResponse{
 		UPI:   productData.UPI,
 		Title: productData.Title,
@@ -80,5 +90,10 @@ func (p *ProdctServiceImpl) FindbyUPI(productUPI string) response.ProductRespons
 
 // Update implements ProductServcice.
 func (p *ProdctServiceImpl) Update(product request.UpdateProductRequest) {
-	panic("unimplemented")
+	productData, err := p.ProductRepository.FindByUPI(product.UPI)
+	helper.ErrorPanic(err)
+	productData.Price = product.Price
+	productData.Title = product.Title
+	p.ProductRepository.Update(productData)
+
 }

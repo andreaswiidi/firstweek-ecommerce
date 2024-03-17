@@ -53,3 +53,38 @@ func (controller *ProductController) FindByUPI(ctx *fiber.Ctx) error {
 	}
 	return ctx.Status(fiber.StatusCreated).JSON(webResponse)
 }
+
+func (controller *ProductController) UpdateProductUsingUPI(ctx *fiber.Ctx) error {
+	updateProductRequest := request.UpdateProductRequest{}
+
+	err := ctx.BodyParser(&updateProductRequest)
+
+	helper.ErrorPanic(err)
+
+	productUPI := ctx.Params("upi")
+	updateProductRequest.UPI = productUPI
+
+	controller.productService.Update(updateProductRequest)
+
+	webResponse := response.Response{
+		Code:    200,
+		Message: "Success",
+	}
+
+	return ctx.Status(fiber.StatusCreated).JSON(webResponse)
+
+}
+
+func (controller *ProductController) DeleteProductUsingUPI(ctx *fiber.Ctx) error {
+
+	productUPI := ctx.Params("upi")
+	controller.productService.Delete(productUPI)
+
+	webResponse := response.Response{
+		Code:    200,
+		Message: "Success",
+	}
+
+	return ctx.Status(fiber.StatusCreated).JSON(webResponse)
+
+}

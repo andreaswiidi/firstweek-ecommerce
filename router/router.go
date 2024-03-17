@@ -21,9 +21,11 @@ func NewRouter(productController *controller.ProductController) *fiber.App {
 		router.Get("", productController.FindAll)
 	})
 
-	// router.Route("/product/:upi",func(router fiber.Router) {
-	// 	router.Delete("",prod)
-	// })
+	router.Route("/product/:upi", func(router fiber.Router) {
+		router.Get("", productController.FindByUPI)
+		router.Patch("", productController.UpdateProductUsingUPI)
+		router.Delete("", productController.DeleteProductUsingUPI)
+	})
 
 	return router
 

@@ -12,7 +12,7 @@ import (
 type ProductRepository interface {
 	Save(product model.Product)
 	Update(product model.Product)
-	Delete(productUPI string)
+	Delete(product model.Product)
 	FindByUPI(productUPI string) (model.Product, error)
 	FindAll() []model.Product
 }
@@ -26,17 +26,15 @@ func NewProductRepositoryImpl(Db *gorm.DB) ProductRepository {
 }
 
 // Delete implements ProductRepository.
-func (p *ProductRepositoryImpl) Delete(productUPI string) {
-	// var product model.Product
-
-	// result := p.Db.Where("UPI = ? ",productUPI)
-	panic("unimplemented")
+func (p *ProductRepositoryImpl) Delete(product model.Product) {
+	result := p.Db.Model(&product).Updates(product)
+	helper.ErrorPanic(result.Error)
 }
 
 // FindAll implements ProductRepository.
 func (p *ProductRepositoryImpl) FindAll() []model.Product {
 	var product []model.Product
-	result := p.Db.Find(&product)
+	result := p.Db.Where(`"isdeleted" = ?`, false).Find(&product)
 	helper.ErrorPanic(result.Error)
 	return product
 }
@@ -45,7 +43,7 @@ func (p *ProductRepositoryImpl) FindAll() []model.Product {
 func (p *ProductRepositoryImpl) FindByUPI(productUPI string) (model.Product, error) {
 	var product model.Product
 
-	result := p.Db.Find(&product, productUPI)
+	result := p.Db.Find(&product, `"UPI" = ? and "isdeleted" = ?`, productUPI, false)
 	if result != nil {
 		return product, nil
 	} else {
@@ -62,7 +60,6 @@ func (p *ProductRepositoryImpl) Save(product model.Product) {
 // Update implements ProductRepository.
 func (p *ProductRepositoryImpl) Update(product model.Product) {
 	var updateProduct = request.UpdateProductRequest{
-		UPI:   product.UPI,
 		Title: product.Title,
 		Price: product.Price,
 	}

@@ -11,6 +11,7 @@ import (
 
 	"github.com/go-playground/validator/v10"
 	"github.com/gofiber/fiber/v2"
+	"github.com/gofiber/fiber/v2/middleware/recover"
 )
 
 func main() {
@@ -31,6 +32,7 @@ func main() {
 	routes := router.NewRouter(productController)
 
 	app := fiber.New()
+	app.Use(recover.New())
 
 	app.Mount("/api", routes)
 
